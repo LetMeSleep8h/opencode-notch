@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>OpenCode Notch</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="frame">
+    <div id="pill">
+      <div class="dots" id="pdots"></div>
+      <span class="plabel">OpenCode</span>
+    </div>
+    <div id="panel">
+      <div id="hdr">
+        <span class="sdot" id="conn"></span>
+        <span class="plabel">OpenCode</span>
+        <span id="hstats"></span>
+        <button id="pin" title="Pin panel open (Ctrl+Alt+N)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+        </button>
+        <button id="mute" title="Mute sounds">
+          <svg class="mx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.4 18.4a9 9 0 0 0 0-12.8"/></svg>
+          <svg class="mo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5z"/><path d="m16 9 6 6"/><path d="m22 9-6 6"/></svg>
+        </button>
+        <button id="q" title="Close notch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div id="toolrow">
+        <input id="filt" type="text" spellcheck="false" placeholder="filter sessions…" />
+      </div>
+      <div id="permslot"></div>
+      <div id="rows"></div>
+      <div id="forms"></div>
+      <div id="sum"></div>
+      <div id="bar">
+        <input id="in" type="text" spellcheck="false" placeholder="reply…" />
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "name": "opencode-notch",
+  "productName": "OpenCode Notch",
+  "version": "0.1.0",
+  "description": "A macOS-style notch for Windows that watches your OpenCode sessions — approvals, forms, live activity and context usage at the top of your screen.",
+  "license": "MIT",
+  "author": "fraches05",
+  "homepage": "https://github.com/fraches05/opencode-notch#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fraches05/opencode-notch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fraches05/opencode-notch/issues"
+  },
+  "keywords": [
+    "opencode",
+    "notch",
+    "dynamic-island",
+    "windows",
+    "electron",
+    "ai-agents",
+    "coding-agent",
+    "overlay",
+    "approvals"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "icon": "node mkicon.mjs",
+    "ico": "node mkico.mjs",
+    "dist": "node mkico.mjs && npx @electron/packager@18 . \"OpenCode Notch\" --platform=win32 --arch=x64 --out=dist --overwrite --asar --icon=build/icon.ico --ignore=\"^/dist\" --ignore=\"^/docs\" --ignore=\"^/build\""
+  },
+  "dependencies": {
+    "@opencode/client": "^2.1.4"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0"
+  }
+}
