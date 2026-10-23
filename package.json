@@ -32,8 +32,8 @@
   "scripts": {
     "start": "electron .",
     "icon": "node mkicon.mjs",
-    "ico": "node mkico.mjs",
-    "dist": "node mkico.mjs && npx @electron/packager@18 . \"OpenCode Notch\" --platform=win32 --arch=x64 --out=dist --overwrite --asar --icon=build/icon.ico --ignore=\"^/dist\" --ignore=\"^/docs\" --ignore=\"^/build\""
+    "ico": "node mkico.mjs build/icon-256.png build/icon.ico",
+    "dist": "node mkico.mjs build/icon-256.png build/icon.ico && npx @electron/packager@18 . \"OpenCode Notch\" --platform=win32 --arch=x64 --out=dist --overwrite --asar --icon=build/icon.ico --ignore=\"^/dist\" --ignore=\"^/docs\" --ignore=\"^/build\""
   },
   "dependencies": {
     "@opencode/client": "^2.1.4"
