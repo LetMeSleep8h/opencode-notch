@@ -18,7 +18,7 @@ Approvals, forms, live agent activity and context usage, always one glance away 
 </div>
 
 <p align="center">
-  <img src="docs/screenshots/panel.png" width="440" alt="OpenCode Notch — an approval request and three sessions" />
+  <img src="docs/demo.gif" width="470" alt="OpenCode Notch — collapsing pill, expanding panel, approval request" />
 </p>
 
 ---
