@@ -409,6 +409,7 @@ const send = () => {
       pinned,
       muted,
       theme,
+      locale: uiLocale(),
       atTop,
       hover: hoverState,
       models: Object.fromEntries(S.models),
@@ -492,6 +493,7 @@ let cur = { w: 240, h: 56 };
 let anchorX = null; // horizontal centre, DIP screen coords
 let anchorY = null; // top edge, DIP screen coords
 let muted = false; // silence the permission beep
+let locale = null; // panel language override: "en" | "ru" | null = follow the OS
 let pinned = false; // keep the panel open regardless of hover
 let theme = "notch"; // notch | midnight | mono
 let syncing = false; // true while our own setBounds moves the window
@@ -509,6 +511,7 @@ function loadPrefs() {
     muted = !!c.muted;
     pinned = !!c.pinned;
     if (THEMES.includes(c.theme)) theme = c.theme;
+    if (c.locale === "en" || c.locale === "ru") locale = c.locale;
   } catch {}
 }
 let saveT = null;
@@ -517,7 +520,7 @@ function savePrefs() {
   saveT = setTimeout(() => {
     try {
       fs.mkdirSync(path.dirname(CFG_PATH), { recursive: true });
-      fs.writeFileSync(CFG_PATH, JSON.stringify({ anchorX, anchorY, muted, pinned, theme }, null, 2));
+      fs.writeFileSync(CFG_PATH, JSON.stringify({ anchorX, anchorY, muted, pinned, theme, locale }, null, 2));
     } catch {}
   }, 400);
 }
@@ -617,15 +620,22 @@ function setTheme(v) {
   tray?.setContextMenu(buildTrayMenu());
 }
 
+const TRAY = {
+  en: { pin: "Pin panel open", unpin: "Unpin panel", show: "Show", hide: "Hide", center: "Center at top", mute: "Mute sounds", theme: "Theme", login: "Launch at login", quit: "Quit", language: "Language", system: "System" },
+  ru: { pin: "Закрепить панель", unpin: "Открепить панель", show: "Показать", hide: "Скрыть", center: "Центрировать сверху", mute: "Без звука", theme: "Тема", login: "Запускать при входе", quit: "Выход", language: "Язык", system: "Системный" },
+};
+const uiLocale = () => locale ?? (app.getLocale().startsWith("ru") ? "ru" : "en");
+
 function buildTrayMenu() {
+  const t = TRAY[uiLocale()];
   return Menu.buildFromTemplate([
-    { label: pinned ? "Unpin panel" : "Pin panel open", click: () => setPinned(!pinned) },
-    { label: "Show", click: () => win?.show() },
-    { label: "Hide", click: () => win?.hide() },
-    { label: "Center at top", click: () => place(true) },
+    { label: pinned ? t.unpin : t.pin, click: () => setPinned(!pinned) },
+    { label: t.show, click: () => win?.show() },
+    { label: t.hide, click: () => win?.hide() },
+    { label: t.center, click: () => place(true) },
     { type: "separator" },
     {
-      label: "Mute sounds",
+      label: t.mute,
       type: "checkbox",
       checked: muted,
       click: (mi) => {
@@ -635,7 +645,7 @@ function buildTrayMenu() {
       },
     },
     {
-      label: "Theme",
+      label: t.theme,
       submenu: [
         { label: "Notch", type: "radio", checked: theme === "notch", click: () => setTheme("notch") },
         { label: "Midnight", type: "radio", checked: theme === "midnight", click: () => setTheme("midnight") },
@@ -643,13 +653,21 @@ function buildTrayMenu() {
       ],
     },
     {
-      label: "Launch at login",
+      label: t.language,
+      submenu: [
+        { label: t.system, type: "radio", checked: locale === null, click: () => { locale = null; savePrefs(); tray?.setContextMenu(buildTrayMenu()); send(); } },
+        { label: "English", type: "radio", checked: locale === "en", click: () => { locale = "en"; savePrefs(); tray?.setContextMenu(buildTrayMenu()); send(); } },
+        { label: "Русский", type: "radio", checked: locale === "ru", click: () => { locale = "ru"; savePrefs(); tray?.setContextMenu(buildTrayMenu()); send(); } },
+      ],
+    },
+    {
+      label: t.login,
       type: "checkbox",
       checked: app.getLoginItemSettings().openAtLogin,
       click: (mi) => app.setLoginItemSettings({ openAtLogin: mi.checked, args: ["--hidden"] }),
     },
     { type: "separator" },
-    { label: "Quit", click: () => app.quit() },
+    { label: t.quit, click: () => app.quit() },
   ]);
 }
 
@@ -671,6 +689,7 @@ function ipcWire() {
       pinned,
       muted,
       theme,
+      locale: uiLocale(),
       hover: hoverState,
       models: Object.fromEntries(S.models),
       sessions: [...S.sessions.values()].map((s) => ({ ...s })),

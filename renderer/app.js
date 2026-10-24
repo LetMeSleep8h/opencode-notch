@@ -19,6 +19,26 @@ const muteBtn = document.getElementById("mute");
 
 /* window.notch is exposed by preload (contextBridge) — do not redeclare */
 
+/* UI strings; `lang` follows the locale the main process reports */
+const UI = {
+  en: {
+    replyTo: (n) => `reply → ${n}`, reply: "reply…", sending: "sending…", retry: "✕ retry",
+    allowOnce: "Allow once", always: "Always", reject: "Reject", send: "Send", fillRequired: "fill required",
+    cancelForm: "Cancel form", interrupt: "Interrupt", filter: "filter sessions…",
+    running: (n) => `${n} running`, approvals: (n) => `${n} approval${n > 1 ? "s" : ""} needed`, forms: (n) => `${n} form${n > 1 ? "s" : ""}`, idle: "idle",
+    summary: (n, busy, tok) => `Σ <b>${n}</b> session${n > 1 ? "s" : ""} · <b>${busy}</b> running · ${tok} tok`, matches: (n) => `${n} match${n > 1 ? "es" : ""}`,
+  },
+  ru: {
+    replyTo: (n) => `ответ → ${n}`, reply: "ответ…", sending: "отправка…", retry: "✕ повтор",
+    allowOnce: "Разрешить раз", always: "Всегда", reject: "Отклонить", send: "Отправить", fillRequired: "заполните обязательное",
+    cancelForm: "Отменить форму", interrupt: "Прервать", filter: "фильтр сессий…",
+    running: (n) => `выполняется: ${n}`, approvals: (n) => `подтверждений: ${n}`, forms: (n) => `форм: ${n}`, idle: "простой",
+    summary: (n, busy, tok) => `Σ <b>${n}</b> сессий · <b>${busy}</b> выполняется · ${tok} ток`, matches: (n) => `найдено: ${n}`,
+  },
+};
+let lang = "en";
+const T = (k) => (UI[lang] ?? UI.en)[k] ?? UI.en[k] ?? k;
+
 let snap = null;
 let hover = false;
 let dismissed = false;
@@ -182,11 +202,11 @@ function formCardHTML(f) {
   return `
 <div class="fcard" data-form="${esc(f.id)}" data-fsid="${esc(f.sessionID)}">
   <div class="ft"><span class="ic">▤</span>${esc(f.title || "Input required")}
-    <button class="fx" data-fcancel="${esc(f.id)}" data-fsid="${esc(f.sessionID)}" title="Cancel form">✕</button>
+    <button class="fx" data-fcancel="${esc(f.id)}" data-fsid="${esc(f.sessionID)}" title="${T("cancelForm")}">✕</button>
   </div>
   <div class="fbody">${fields}</div>
   <div class="factions">
-    <button class="fsend" data-fsend="${esc(f.id)}" data-fsid="${esc(f.sessionID)}">Send</button>
+    <button class="fsend" data-fsend="${esc(f.id)}" data-fsid="${esc(f.sessionID)}">${T("send")}</button>
   </div>
 </div>`;
 }
@@ -273,15 +293,17 @@ function render() {
   frame.classList.toggle("ex", expanded);
 
   if (!target || !active.some((s) => s.id === target)) target = active[0]?.id ?? null;
-  input.placeholder = target && (snap.sessions ?? []).length ? `reply → ${baseName(target)}` : "reply…";
+  if (snap.locale && UI[snap.locale]) lang = snap.locale;
+  filterEl.placeholder = T("filter");
+  input.placeholder = target && (snap.sessions ?? []).length ? T("replyTo")(baseName(target)) : T("reply");
 
   /* header */
   conn.className = `sdot ${snap.connected ? "done" : "off"}`;
   const busyN = active.filter((s) => s.status === "busy" || s.status === "retry").length;
   hstats.textContent = snap.connected
-    ? [busyN ? `${busyN} running` : null, perms.length ? `${perms.length} approval${perms.length > 1 ? "s" : ""} needed` : null, forms.length ? `${forms.length} form${forms.length > 1 ? "s" : ""}` : null]
+    ? [busyN ? T("running")(busyN) : null, perms.length ? T("approvals")(perms.length) : null, forms.length ? T("forms")(forms.length) : null]
         .filter(Boolean)
-        .join(" · ") || "idle"
+        .join(" · ") || T("idle")
     : "reconnecting…";
   pinBtn.classList.toggle("on", pinned);
   muteBtn.classList.toggle("off", muted);
@@ -303,9 +325,9 @@ function render() {
   <div class="pt"><span class="ic">⚠</span>${esc(p.title || p.action || "Permission")}</div>
   <div class="pd">${esc(permDetail(p))}</div>
   <div class="pb">
-    <button class="b1" data-act="once" data-pid="${esc(p.id)}" data-sid="${esc(p.sessionID)}">Allow once</button>
-    <button class="b2" data-act="always" data-pid="${esc(p.id)}" data-sid="${esc(p.sessionID)}">Always</button>
-    <button class="b3" data-act="reject" data-pid="${esc(p.id)}" data-sid="${esc(p.sessionID)}">Reject</button>
+    <button class="b1" data-act="once" data-pid="${esc(p.id)}" data-sid="${esc(p.sessionID)}">${T("allowOnce")}</button>
+    <button class="b2" data-act="always" data-pid="${esc(p.id)}" data-sid="${esc(p.sessionID)}">${T("always")}</button>
+    <button class="b3" data-act="reject" data-pid="${esc(p.id)}" data-sid="${esc(p.sessionID)}">${T("reject")}</button>
   </div>
 </div>`,
     )
@@ -348,7 +370,7 @@ function render() {
         ${s.lastTool ? `<span class="sep">·</span><span class="stool" title="${esc(s.lastTool)}">${esc(s.lastTool)}</span>` : ""}
       </span>
       ${cost ? `<span class="cost">${esc(cost)}</span>` : ""}
-      ${s.status !== "idle" ? `<button class="ibtn" data-int="${esc(s.id)}" title="Interrupt">■</button>` : ""}
+      ${s.status !== "idle" ? `<button class="ibtn" data-int="${esc(s.id)}" title="${T("interrupt")}">■</button>` : ""}
     </div>
     ${
       act
@@ -372,9 +394,9 @@ function render() {
   const sumTok = active.reduce((a, s) => a + totalTokens(s), 0);
   sumEl.innerHTML =
     active.length && !fq
-      ? `Σ <b>${active.length}</b> session${active.length > 1 ? "s" : ""} · <b>${busyN}</b> running · ${fmtTok(sumTok)} tok${sumCost > 0 ? ` · <b>${esc(fmtCost(sumCost))}</b>` : ""}`
+      ? T("summary")(active.length, busyN, fmtTok(sumTok)) + (sumCost > 0 ? ` · <b>${esc(fmtCost(sumCost))}</b>` : "")
       : active.length
-        ? `${active.length} match${active.length > 1 ? "es" : ""}`
+        ? T("matches")(active.length)
         : "";
 }
 
@@ -515,17 +537,17 @@ document.addEventListener("click", async (e) => {
     if (!form) return;
     const answer = collectAnswer(fid, form.fields ?? []);
     if (!answer) {
-      fsend.textContent = "fill required";
-      setTimeout(() => (fsend.textContent = "Send"), 1400);
+      fsend.textContent = T("fillRequired");
+      setTimeout(() => (fsend.textContent = T("send")), 1400);
       return;
     }
     fsend.disabled = true;
-    fsend.textContent = "sending…";
+    fsend.textContent = T("sending");
     const res = await notch.formReply(form.sessionID, fid, answer);
     if (!res?.ok) {
       fsend.disabled = false;
-      fsend.textContent = "✕ retry";
-      setTimeout(() => (fsend.textContent = "Send"), 1400);
+      fsend.textContent = T("retry");
+      setTimeout(() => (fsend.textContent = T("send")), 1400);
     }
     return;
   }
@@ -558,7 +580,7 @@ document.addEventListener("click", async (e) => {
   if (row && row.dataset.sid) {
     target = row.dataset.sid;
     input.focus();
-    input.placeholder = `reply → ${baseName(target)}`;
+    input.placeholder = T("replyTo")(baseName(target));
     render();
   }
 });
@@ -568,6 +590,6 @@ input.addEventListener("keydown", async (e) => {
   const v = input.value.trim();
   if (!v || !target) return;
   input.value = "";
-  input.placeholder = "sending…";
+  input.placeholder = T("sending");
   await notch.prompt(target, v);
 });
