@@ -13,7 +13,7 @@
 [![Electron](https://img.shields.io/badge/Electron-45-47848F?style=flat-square)](https://www.electronjs.org)
 [![Лицензия](https://img.shields.io/badge/license-MIT-3DA639?style=flat-square)](LICENSE)
 
-[Скачать](#установка) · [Возможности](#возможности) · [Как это работает](#как-это-работает) · [Если что-то не работает](#если-что-то-не-работает)
+[Скачать](#установка) · [Сайт](https://fraches05.github.io/opencode-notch/) · [Возможности](#возможности) · [Как это работает](#как-это-работает) · [Если что-то не работает](#если-что-то-не-работает)
 
 **Русский** · [English](README.md)
 

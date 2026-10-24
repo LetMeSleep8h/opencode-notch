@@ -13,7 +13,7 @@ Approvals, forms, live agent activity and context usage, always one glance away 
 [![Electron](https://img.shields.io/badge/Electron-45-47848F?style=flat-square)](https://www.electronjs.org)
 [![License](https://img.shields.io/badge/license-MIT-3DA639?style=flat-square)](LICENSE)
 
-[Download](#install) · [Features](#features) · [How it works](#how-it-works) · [Troubleshooting](#troubleshooting)
+[Download](#install) · [Website](https://fraches05.github.io/opencode-notch/) · [Features](#features) · [How it works](#how-it-works) · [Troubleshooting](#troubleshooting)
 
 **English** · [Русский](README.ru.md)
 
