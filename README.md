@@ -15,6 +15,8 @@ Approvals, forms, live agent activity and context usage, always one glance away 
 
 [Download](#install) · [Features](#features) · [How it works](#how-it-works) · [Troubleshooting](#troubleshooting)
 
+**English** · [Русский](README.ru.md)
+
 </div>
 
 <p align="center">
