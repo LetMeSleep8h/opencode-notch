@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OpenCode Notch — a macOS-style notch for Windows</title>
+<meta name="description" content="A macOS-style notch for Windows that watches your OpenCode sessions: approvals, forms, live agent activity and context usage at the top of your screen." />
+<meta property="og:title" content="OpenCode Notch" />
+<meta property="og:description" content="Your agents live in the notch. Approvals, forms and live activity for OpenCode sessions on Windows." />
+<meta property="og:image" content="https://fraches05.github.io/opencode-notch/icon.png" />
+<meta property="og:type" content="website" />
+<link rel="icon" href="icon.png" />
+<style>
+  :root {
+    --bg: #07080c;
+    --panel: #0d1018;
+    --line: rgba(255,255,255,.08);
+    --text: #e7ecf5;
+    --dim: #93a1b6;
+    --busy: #7dd3fc;
+    --att: #fbbf24;
+    --mint: #34d399;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
+  a { color: var(--busy); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  header {
+    position: relative; overflow: hidden;
+    background: radial-gradient(90% 130% at 50% -30%, #1c2740 0%, #0e1320 45%, #07080c 100%);
+    border-bottom: 1px solid var(--line);
+    padding: 30px 0 70px;
+  }
+  header::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(110% 90% at 50% 0%, #000 25%, transparent 80%);
+  }
+  nav { display: flex; align-items: center; gap: 18px; font-size: 14px; position: relative; z-index: 2; }
+  nav .sp { margin-left: auto; }
+  .top { position: relative; z-index: 2; text-align: center; padding-top: 54px; }
+  .top img.icon { width: 108px; border-radius: 26px; box-shadow: 0 24px 60px rgba(0,0,0,.6); }
+  h1 { font-size: clamp(34px, 5.4vw, 56px); letter-spacing: -1.4px; line-height: 1.08; margin: 26px 0 0; }
+  .sub { color: var(--dim); font-size: 18px; max-width: 620px; margin: 16px auto 0; }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 12px 22px; border-radius: 11px; font-weight: 600; font-size: 15px;
+    border: 1px solid var(--line); color: var(--text); background: rgba(255,255,255,.04);
+  }
+  .btn:hover { text-decoration: none; background: rgba(255,255,255,.08); }
+  .btn.primary { background: linear-gradient(180deg, #8fdcff, #5cc4f4); color: #04222f; border-color: transparent; }
+  .btn.primary:hover { filter: brightness(1.06); }
+  .hero-shot { position: relative; z-index: 2; margin: 46px auto 0; width: min(470px, 92%); }
+  .hero-shot img { width: 100%; border-radius: 14px; box-shadow: 0 40px 90px rgba(0,0,0,.65); border: 1px solid var(--line); }
+
+  section { padding: 62px 0; border-bottom: 1px solid var(--line); }
+  section h2 { font-size: 28px; letter-spacing: -.6px; margin: 0 0 10px; }
+  section p.lead { color: var(--dim); margin: 0 0 34px; max-width: 680px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 20px; }
+  .card h3 { font-size: 15px; margin: 0 0 6px; }
+  .card p { margin: 0; color: var(--dim); font-size: 13.5px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+  .d-busy { background: var(--busy); box-shadow: 0 0 10px rgba(125,211,252,.8); }
+  .d-att { background: var(--att); box-shadow: 0 0 10px rgba(251,191,36,.8); }
+  .d-mint { background: var(--mint); box-shadow: 0 0 10px rgba(52,211,153,.8); }
+
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .shots figure { margin: 0; }
+  .shots img { width: 100%; border-radius: 12px; border: 1px solid var(--line); display: block; }
+  .shots figcaption { color: var(--dim); font-size: 13px; margin-top: 8px; text-align: center; }
+
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+  ol.steps li { position: relative; padding-left: 44px; color: var(--dim); }
+  ol.steps li::before {
+    counter-increment: s; content: counter(s);
+    position: absolute; left: 0; top: 1px;
+    width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center;
+    background: rgba(125,211,252,.12); color: var(--busy); font-size: 13px; font-weight: 700;
+    border: 1px solid rgba(125,211,252,.25);
+  }
+  ol.steps b { color: var(--text); font-weight: 600; }
+  code { background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+  .note {
+    margin-top: 22px; padding: 14px 16px; border-radius: 11px; font-size: 13.5px; color: var(--dim);
+    background: rgba(251,191,36,.07); border: 1px solid rgba(251,191,36,.25);
+  }
+  footer { padding: 34px 0 60px; color: var(--dim); font-size: 13px; text-align: center; }
+  .lang { font-size: 13px; opacity: .8; }
+  .lang b { color: var(--text); }
+  [data-ru] { display: none; }
+  body.ru [data-ru] { display: revert; }
+  body.ru [data-en] { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <nav>
+      <a href="https://github.com/fraches05/opencode-notch">GitHub</a>
+      <a href="https://github.com/fraches05/opencode-notch/releases"><span data-en>Download</span><span data-ru>Скачать</span></a>
+      <a href="https://github.com/fraches05/opencode-notch/issues"><span data-en>Issues</span><span data-ru>Проблемы</span></a>
+      <span class="sp lang">
+        <a href="#" id="toggle">English · <span style="opacity:.55">Русский</span></a>
+      </span>
+    </nav>
+    <div class="top">
+      <img class="icon" src="icon.png" alt="OpenCode Notch" />
+      <h1 data-en>Your agents live in the notch.</h1>
+      <h1 data-ru>Твои агенты живут в notch.</h1>
+      <p class="sub" data-en>A macOS-style notch for Windows that watches every OpenCode session — approvals, forms, live tool activity and context usage, always one glance away.</p>
+      <p class="sub" data-ru>Notch в стиле macOS для Windows: следит за сессиями OpenCode — подтверждения, формы, живая активность инструментов и расход контекста всегда на виду.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/fraches05/opencode-notch/releases">
+          <span data-en>Download for Windows</span><span data-ru>Скачать для Windows</span>
+        </a>
+        <a class="btn" href="https://github.com/fraches05/opencode-notch">★ <span data-en>Star on GitHub</span><span data-ru>Звезда на GitHub</span></a>
+      </div>
+      <div class="hero-shot">
+        <img src="demo.gif" alt="Panel expanding from the notch" />
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2 data-en>What it does</h2>
+    <h2 data-ru>Что он делает</h2>
+    <p class="lead" data-en>No plugin, no hooks, no API keys. It talks to the OpenCode background service directly, so it works with whatever you already have running.</p>
+    <p class="lead" data-ru>Без плагинов, хуков и API-ключей. Он общается с фоновым сервисом OpenCode напрямую — работает с тем, что уже запущено.</p>
+    <div class="grid">
+      <div class="card"><h3><span class="dot d-busy"></span><span data-en>Live sessions</span><span data-ru>Живые сессии</span></h3><p data-en>Titles, folders, models, elapsed time and the exact tool call in flight.</p><p data-ru>Заголовки, папки, модели, время и текущий вызов инструмента.</p></div>
+      <div class="card"><h3><span class="dot d-att"></span><span data-en>Approvals</span><span data-ru>Подтверждения</span></h3><p data-en>Allow once, always or reject — right from the notch, with a sound cue.</p><p data-ru>Разрешить раз, всегда или отклонить — прямо из notch, со звуком.</p></div>
+      <div class="card"><h3><span class="dot d-mint"></span><span data-en>Forms</span><span data-ru>Формы</span></h3><p data-en>Agent questions rendered as real inputs: selects, checkboxes, validation.</p><p data-ru>Вопросы агента как настоящие поля: списки, чекбоксы, валидация.</p></div>
+      <div class="card"><h3><span class="dot d-busy"></span><span data-en>Context usage</span><span data-ru>Расход контекста</span></h3><p data-en>Per-session token usage and percentage of the model window, updated live.</p><p data-ru>Токены и процент окна модели по каждой сессии, в реальном времени.</p></div>
+      <div class="card"><h3><span class="dot d-mint"></span><span data-en>Quick reply</span><span data-ru>Быстрый ответ</span></h3><p data-en>Type the next instruction without leaving what you were doing.</p><p data-ru>Напишите следующую инструкцию, не переключая окно.</p></div>
+      <div class="card"><h3><span class="dot d-att"></span><span data-en>Stays out of the way</span><span data-ru>Не мешает</span></h3><p data-en>Collapsed to a pill, expands on hover, stays where you drag it.</p><p data-ru>Свёрнут в пилюлю, раскрывается при наведении, остаётся там, куда перетащили.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 data-en>Screenshots</h2>
+    <h2 data-ru>Скриншоты</h2>
+    <div class="shots">
+      <figure><img src="screenshots/panel.png" alt="Approval request" /><figcaption data-en>An approval waiting for you</figcaption><figcaption data-ru>Подтверждение ждёт вас</figcaption></figure>
+      <figure><img src="screenshots/sessions.png" alt="Sessions" /><figcaption data-en>Three sessions, one finished</figcaption><figcaption data-ru>Три сессии, одна завершена</figcaption></figure>
+      <figure><img src="screenshots/form.png" alt="Form" /><figcaption data-en>A form answered inside the notch</figcaption><figcaption data-ru>Форма, заполненная прямо в notch</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 data-en>Install</h2>
+    <h2 data-ru>Установка</h2>
+    <ol class="steps">
+      <li><b data-en>Download the zip</b><b data-ru>Скачайте zip</b><br /><span data-en>From the <a href="https://github.com/fraches05/opencode-notch/releases">Releases page</a>.</span><span data-ru>Со страницы <a href="https://github.com/fraches05/opencode-notch/releases">Releases</a>.</span></li>
+      <li><b data-en>Unzip anywhere</b><b data-ru>Распакуйте куда угодно</b><br /><span data-en>For example to <code>Desktop\OpenCode Notch</code>. Nothing is installed system-wide.</span><span data-ru>Например в <code>Desktop\OpenCode Notch</code>. В систему ничего не ставится.</span></li>
+      <li><b data-en>Run OpenCode Notch.exe</b><b data-ru>Запустите OpenCode Notch.exe</b><br /><span data-en>The black capsule appears at the top of your screen. Hover it to open.</span><span data-ru>Чёрная капсула появится сверху экрана. Наведите — раскроется.</span></li>
+    </ol>
+    <div class="note" data-en>Windows may warn that the app is unsigned: click <b>More info → Run anyway</b>. Build it yourself with <code>npm start</code> if you prefer.</div>
+    <div class="note" data-ru>Windows может предупредить, что приложение без подписи: нажмите <b>Подробнее → Выполнить в любом случае</b>. Можно собрать самому через <code>npm start</code>.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      <a href="https://github.com/fraches05/opencode-notch">GitHub</a> ·
+      <a href="https://github.com/fraches05/opencode-notch/releases">Releases</a> ·
+      <a href="https://github.com/fraches05/opencode-notch/blob/main/README.ru.md">README (RU)</a> ·
+      MIT
+    </p>
+    <p data-en>Unofficial project. Not affiliated with OpenCode. Inspired by lumiomac.app.</p>
+    <p data-ru>Неофициальный проект. Не связан с OpenCode. Вдохновлён lumiomac.app.</p>
+  </div>
+</footer>
+
+<script>
+  const stored = localStorage.getItem("lang");
+  const wantsRu = stored ? stored === "ru" : (navigator.language || "").toLowerCase().startsWith("ru");
+  if (wantsRu) document.body.classList.add("ru");
+  const toggle = document.getElementById("toggle");
+  const paint = () => {
+    toggle.innerHTML = document.body.classList.contains("ru")
+      ? '<span style="opacity:.55">English</span> · Русский'
+      : 'English · <span style="opacity:.55">Русский</span>';
+  };
+  paint();
+  toggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    const ru = document.body.classList.toggle("ru");
+    localStorage.setItem("lang", ru ? "ru" : "en");
+    paint();
+  });
+</script>
+</body>
+</html>
